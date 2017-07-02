@@ -11,6 +11,8 @@
         <attr name="showRanges" format="boolean"/>
         <attr name="showText" format="boolean"/>
 
+        <attr name="hideCentralZoneWithColor" format="color"/>
+
         <attr name="outerShadowWidth" format="float"/>
         <attr name="outerBorderWidth" format="float"/>
         <attr name="outerRimWidth" format="float"/>

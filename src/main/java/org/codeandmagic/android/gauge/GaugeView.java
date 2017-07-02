@@ -1,5 +1,6 @@
 package org.codeandmagic.android.gauge;
 
+import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -7,20 +8,23 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.RadialGradient;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Shader.TileMode;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 
 public class GaugeView extends View {
 
     private static final String TAG = "GaugeView";
+
+    private static final long ANIMATION_DURATION_DEFAULT = 1000;
 
     public static final float NEEDLE_WIDTH = 0.2f;
     public static final float NEEDLE_HEIGHT = 1.0f;
@@ -34,6 +38,7 @@ public class GaugeView extends View {
     private static final int NEEDLE_COLOR = Color.GRAY;
     private static final int NEUTRAL_DARK_COLOR = Color.GRAY;
     private static final int NEUTRAL_LIGHT_COLOR = Color.LTGRAY;
+
 
     // *--------------------------------------------------------------------- *//
     // Customizable properties
@@ -64,6 +69,7 @@ public class GaugeView extends View {
     private int mNeutralDarkColor;
     private int mNeutralLightColor;
     private int mNeedleColor;
+    private int mHideCentralZoneWithColor;
     private Paint mBackgroundPaintLight;
     private RectF backgroundRectF;
     private float needleAngle;
@@ -71,6 +77,9 @@ public class GaugeView extends View {
     private int mWidth;
     private int mHeight;
     private Rect mClipRect;
+    private RectF backgroundHideRectF;
+    private float mInnerRimWidth;
+    private Paint mBackgroundHidePaint;
 
     public GaugeView(final Context context, final AttributeSet attrs, final int defStyle) {
         super(context, attrs, defStyle);
@@ -110,6 +119,10 @@ public class GaugeView extends View {
         mNeedleHeight = a.getFloat(R.styleable.GaugeView_needleHeight, NEEDLE_HEIGHT);
 
         mScaleStartAngle = a.getFloat(R.styleable.GaugeView_scaleStartAngle, SCALE_START_ANGLE);
+
+        mInnerRimWidth = a.getFloat(R.styleable.GaugeView_innerRimWidth, 0);
+        mHideCentralZoneWithColor = a.getColor(R.styleable.GaugeView_hideCentralZoneWithColor, -1);
+
 
     }
 
@@ -158,7 +171,12 @@ public class GaugeView extends View {
         mBackgroundPaintLight.setFilterBitmap(true);
         mBackgroundPaintDark.setFilterBitmap(true);
 
-        backgroundRectF = new RectF(0, 0, mWidth, mHeight * 2);
+        mBackgroundHidePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mBackgroundHidePaint.setColor(mHideCentralZoneWithColor);
+        mBackgroundHidePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
+
+        backgroundRectF = new RectF();
+        backgroundHideRectF = new RectF();
 
         setDefaultNeedlePaths();
         mNeedleLeftPaint = getDefaultNeedleLeftPaint();
@@ -286,6 +304,7 @@ public class GaugeView extends View {
 
         Log.i(TAG, String.format("set background size: (height=%d) %f, %f, %f, %f", newHeight, left, 0f, right, bottom));
         backgroundRectF.set(left, 0, right, bottom);
+        backgroundHideRectF.set(backgroundRadius * (1 - mInnerRimWidth), backgroundRadius * (1 - mInnerRimWidth), right - backgroundRadius * (1 - mInnerRimWidth), bottom - backgroundRadius * (1 - mInnerRimWidth));
 
 //        mWidth = widthSize;
         mWidth = (int) (backgroundRadius * 2);
@@ -355,6 +374,9 @@ public class GaugeView extends View {
 
         canvas.drawArc(backgroundRectF, -start1, -sweep1, true, mBackgroundPaintLight);
         canvas.drawArc(backgroundRectF, -start2, -sweep2, true, mBackgroundPaintDark);
+        if (mInnerRimWidth > 0) {
+            canvas.drawArc(backgroundHideRectF, -start1 + 1, -sweep1 - sweep2 - 2, true, mBackgroundHidePaint);
+        }
 
     }
 
@@ -406,6 +428,7 @@ public class GaugeView extends View {
         return (270 + mScaleStartAngle + value / 100 * (180 - 2 * mScaleStartAngle)) % 360;
     }
 
+    @android.support.annotation.Keep
     public void setTargetValue(final float value) {
 //        if (mShowScale || mShowRanges) {
 //            if (value < mScaleStartValue) {
@@ -425,4 +448,17 @@ public class GaugeView extends View {
         invalidate();
     }
 
+    public float getTargetValue() {
+        return mCurrentValue;
+    }
+
+    public void animateTargetValue(double v) {
+        ObjectAnimator animation = ObjectAnimator.ofFloat(this, "targetValue", mCurrentValue, (float) v); // see this max value coming back here, we animale towards that value
+
+        animation.setDuration(ANIMATION_DURATION_DEFAULT); //in milliseconds
+        animation.setInterpolator(new DecelerateInterpolator());
+
+        post(animation::start);
+
+    }
 }
