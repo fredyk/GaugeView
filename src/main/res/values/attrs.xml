@@ -10,6 +10,7 @@
         <attr name="showScale" format="boolean"/>
         <attr name="showRanges" format="boolean"/>
         <attr name="showText" format="boolean"/>
+        <attr name="useGradient" format="boolean"/>
 
         <attr name="hideCentralZoneWithColor" format="color"/>
 

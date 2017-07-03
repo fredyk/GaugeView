@@ -25,6 +25,7 @@ public class GaugeView extends View {
     private static final String TAG = "GaugeView";
 
     private static final long ANIMATION_DURATION_DEFAULT = 1000;
+    private static final boolean USE_GRADIENT_DEFAULT = true;
 
     public static final float NEEDLE_WIDTH = 0.2f;
     public static final float NEEDLE_HEIGHT = 1.0f;
@@ -56,6 +57,8 @@ public class GaugeView extends View {
 
     private Path mNeedleRightPath;
     private Path mNeedleLeftPath;
+
+    private boolean useGradient;
 
     // *--------------------------------------------------------------------- *//
 
@@ -122,6 +125,8 @@ public class GaugeView extends View {
 
         mInnerRimWidth = a.getFloat(R.styleable.GaugeView_innerRimWidth, 0);
         mHideCentralZoneWithColor = a.getColor(R.styleable.GaugeView_hideCentralZoneWithColor, -1);
+
+        useGradient = a.getBoolean(R.styleable.GaugeView_useGradient, USE_GRADIENT_DEFAULT);
 
 
     }
@@ -352,16 +357,6 @@ public class GaugeView extends View {
             needleAngle = (90 + (360 - needleAngle));
         }
 
-        if (isInEditMode()) {
-//            mPositiveDarkColor = POSITIVE_DARK_COLOR;
-//            mPositiveLightColor = POSITIVE_LIGHT_COLOR;
-//            mNegativeDarkColor = NEGATIVE_DARK_COLOR;
-//            mNegativeLightColor = NEGATIVE_LIGHT_COLOR;
-//            mNeutralDarkColor = NEUTRAL_DARK_COLOR;
-//            mNeutralLightColor = NEUTRAL_LIGHT_COLOR;
-        }
-
-//        int start1 = (int) (mScaleStartAngle - 90);
         int start1 = (int) mScaleStartAngle;
         int end = 180 - start1;
 
@@ -382,22 +377,102 @@ public class GaugeView extends View {
 
     private void computeBackgrounds() {
 
-        if (mCurrentValue > 50.1)
-            mBackgroundPaintLight.setColor(mPositiveLightColor);
-        else if (mCurrentValue < 49.9) {
+        if (!useGradient) {
 
-            mBackgroundPaintLight.setColor(mNegativeLightColor);
+            if (mCurrentValue > 50.1)
+                mBackgroundPaintLight.setColor(mPositiveLightColor);
+            else if (mCurrentValue < 49.9) {
+
+                mBackgroundPaintLight.setColor(mNegativeLightColor);
+            } else {
+                mBackgroundPaintLight.setColor(mNeutralLightColor);
+
+            }
+            if (mCurrentValue > 50.1)
+                mBackgroundPaintDark.setColor(mPositiveDarkColor);
+            else if (mCurrentValue < 49.9) {
+
+                mBackgroundPaintDark.setColor(mNegativeDarkColor);
+            } else {
+                mBackgroundPaintDark.setColor(mNeutralDarkColor);
+            }
+
         } else {
-            mBackgroundPaintLight.setColor(mNeutralLightColor);
 
-        }
-        if (mCurrentValue > 50.1)
-            mBackgroundPaintDark.setColor(mPositiveDarkColor);
-        else if (mCurrentValue < 49.9) {
+            int red0 = Color.red(mNegativeLightColor);
+            int green0 = Color.green(mNegativeLightColor);
+            int blue0 = Color.blue(mNegativeLightColor);
 
-            mBackgroundPaintDark.setColor(mNegativeDarkColor);
-        } else {
-            mBackgroundPaintDark.setColor(mNeutralDarkColor);
+            int red1 = Color.red(mNeutralLightColor);
+            int green1 = Color.green(mNeutralLightColor);
+            int blue1 = Color.blue(mNeutralLightColor);
+
+            int red2 = Color.red(mPositiveLightColor);
+            int green2 = Color.green(mPositiveLightColor);
+            int blue2 = Color.blue(mPositiveLightColor);
+
+            if (mCurrentValue > 50.1)
+//            mBackgroundPaintLight.setColor(mPositiveLightColor);
+                mBackgroundPaintLight.setColor(Color.rgb(
+                        (int) ((red1 * (100 - mCurrentValue) + red2 * mCurrentValue) / 100f),
+                        (int) ((green1 * (100 - mCurrentValue) + green2 * mCurrentValue) / 100f),
+                        (int) ((blue1 * (100 - mCurrentValue) + blue2 * mCurrentValue) / 100f)
+                ));
+            else if (mCurrentValue < 49.9) {
+
+//            mBackgroundPaintLight.setColor(mNegativeLightColor);
+                mBackgroundPaintLight.setColor(Color.rgb(
+                        (int) ((red0 * (100 - mCurrentValue * 2) + red1 * mCurrentValue * 2) / 100f),
+                        (int) ((green0 * (100 - mCurrentValue * 2) + green1 * mCurrentValue * 2) / 100f),
+                        (int) ((blue0 * (100 - mCurrentValue * 2) + blue1 * mCurrentValue * 2) / 100f)
+                ));
+            } else {
+                mBackgroundPaintLight.setColor(mNeutralLightColor);
+//            mBackgroundPaintLight.setColor(Color.rgb(
+//                    (int) ((red0 * (100 - mCurrentValue) + red1 * mCurrentValue) / 100f),
+//                    (int) ((green0 * (100 - mCurrentValue) + green1 * mCurrentValue) / 100f),
+//                    (int) ((blue0 * (100 - mCurrentValue) + blue1 * mCurrentValue) / 100f)
+//            ));
+
+            }
+
+
+            red0 = Color.red(mNegativeDarkColor);
+            green0 = Color.green(mNegativeDarkColor);
+            blue0 = Color.blue(mNegativeDarkColor);
+
+            red1 = Color.red(mNeutralDarkColor);
+            green1 = Color.green(mNeutralDarkColor);
+            blue1 = Color.blue(mNeutralDarkColor);
+
+            red2 = Color.red(mPositiveDarkColor);
+            green2 = Color.green(mPositiveDarkColor);
+            blue2 = Color.blue(mPositiveDarkColor);
+
+            if (mCurrentValue > 50.1) {
+//            mBackgroundPaintDark.setColor(mPositiveDarkColor);
+                mBackgroundPaintDark.setColor(Color.rgb(
+                        (int) ((red1 * (100 - mCurrentValue) + red2 * mCurrentValue) / 100f),
+                        (int) ((green1 * (100 - mCurrentValue) + green2 * mCurrentValue) / 100f),
+                        (int) ((blue1 * (100 - mCurrentValue) + blue2 * mCurrentValue) / 100f)
+                ));
+            } else if (mCurrentValue < 49.9) {
+
+//            mBackgroundPaintDark.setColor(mNegativeDarkColor);
+                mBackgroundPaintDark.setColor(Color.rgb(
+                        (int) ((red0 * (100 - mCurrentValue * 2) + red1 * mCurrentValue * 2) / 100f),
+                        (int) ((green0 * (100 - mCurrentValue * 2) + green1 * mCurrentValue * 2) / 100f),
+                        (int) ((blue0 * (100 - mCurrentValue * 2) + blue1 * mCurrentValue * 2) / 100f)
+                ));
+            } else {
+                mBackgroundPaintDark.setColor(mNeutralDarkColor);
+//            mBackgroundPaintDark.setColor(Color.rgb(
+//                    (int) ((red0 * (100 - mCurrentValue) + red1 * mCurrentValue) / 100f),
+//                    (int) ((green0 * (100 - mCurrentValue) + green1 * mCurrentValue) / 100f),
+//                    (int) ((blue0 * (100 - mCurrentValue) + blue1 * mCurrentValue) / 100f)
+//            ));
+            }
+
         }
     }
 
@@ -460,5 +535,9 @@ public class GaugeView extends View {
 
         post(animation::start);
 
+    }
+
+    public void setUseGradient(boolean useGradient) {
+        this.useGradient = useGradient;
     }
 }
