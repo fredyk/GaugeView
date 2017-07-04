@@ -485,7 +485,7 @@ public class GaugeView extends View {
             canvas.save(Canvas.MATRIX_SAVE_FLAG);
 
             float centerY = 1.0f - mNeedleWidth * 0.5f;
-            Log.i(TAG, String.format("needle centerY: %f, %f, %d", centerY, mNeedleWidth, mHeight));
+//            Log.i(TAG, String.format("needle centerY: %f, %f, %d", centerY, mNeedleWidth, mHeight));
 
             canvas.rotate(needleAngle, 0.5f, centerY);
 
