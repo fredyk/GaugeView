@@ -307,7 +307,6 @@ public class GaugeView extends View {
         float right = backgroundRadius * 2;
         float bottom = backgroundRadius * 2;
 
-        Log.i(TAG, String.format("set background size: (height=%d) %f, %f, %f, %f", newHeight, left, 0f, right, bottom));
         backgroundRectF.set(left, 0, right, bottom);
         backgroundHideRectF.set(backgroundRadius * (1 - mInnerRimWidth), backgroundRadius * (1 - mInnerRimWidth), right - backgroundRadius * (1 - mInnerRimWidth), bottom - backgroundRadius * (1 - mInnerRimWidth));
 
