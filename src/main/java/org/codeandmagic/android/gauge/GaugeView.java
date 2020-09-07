@@ -16,9 +16,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
+
+import androidx.annotation.Keep;
 
 public class GaugeView extends View {
 
@@ -502,7 +503,7 @@ public class GaugeView extends View {
         return (270 + mScaleStartAngle + value / 100 * (180 - 2 * mScaleStartAngle)) % 360;
     }
 
-    @android.support.annotation.Keep
+    @Keep
     public void setTargetValue(final float value) {
 //        if (mShowScale || mShowRanges) {
 //            if (value < mScaleStartValue) {
