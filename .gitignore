@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # built application files
 *.apk
 *.ap_
@@ -26,3 +27,4 @@ local.properties
 # IntelliJ files
 .idea
 *.iml
+build/
